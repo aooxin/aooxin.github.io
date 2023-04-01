@@ -1,0 +1,585 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://pic.downk.cc/item/5e2a7c362fb38b8c3c5b9d48.jpg">
+  <link rel="icon" type="image/png" href="https://pic.downk.cc/item/5e2a7c362fb38b8c3c5b9d48.jpg">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="">
+  <meta name="author" content="max">
+  <meta name="keywords" content="">
+  <title>Assignment|集成学习Adaboost决策树的原理和代码实现 - Aoxin Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.4.0/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"www.auswitz.top","root":"/","version":"1.8.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"onlypost":false},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.3.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Aoxin`s Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" href="javascript:">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://pic.downk.cc/item/5ff6ec6a3ffa7d37b3561203.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Assignment|集成学习Adaboost决策树的原理和代码实现">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-01-28 21:28" pubdate>
+        2022年1月28日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.3k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      16
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Assignment|集成学习Adaboost决策树的原理和代码实现</h1>
+            
+            <div class="markdown-body">
+              <h1 id="算法思想"><a href="#算法思想" class="headerlink" title="算法思想"></a>算法思想</h1><p>Adaboost是一种集成学习(Ensemble)思想的算法。在之前，没有一种方法可以使得弱分类器有效的变为强分类器，后面集成学习的出现解决了这一问题，可以使得弱分类器变为强分类器。集成学习主要可以分为两个方法：Sequential Method和Parallel Method，其中Sequential Method中最为基础的代表便是Adaboost。该算法的核心思想如下图。</p>
+<p><img src="https://pic.imgdb.cn/item/61f3f0e92ab3f51d91332834.jpg" srcset="/img/loading.gif"></p>
+<p>Adaboost相比于原始决策树具有以下优势：</p>
+<ol>
+<li><p>Adaboost是一种精度非常高的分类器；</p>
+</li>
+<li><p>可以与各种方法构建子分类器，Adaboost算法提供一种计算框架；</p>
+</li>
+<li><p>弱分类器的构造方法比较简单；</p>
+</li>
+<li><p>算法易于理解，不用做特征筛选；</p>
+</li>
+<li><p>不易发生过拟合；</p>
+</li>
+<li><p>易于编码（和奥卡姆剃刀有悖）。</p>
+</li>
+</ol>
+<p>Adaboost算法伪代码如下：</p>
+<p><img src="https://pic.imgdb.cn/item/61f3f1032ab3f51d913346db.jpg" srcset="/img/loading.gif"></p>
+<p><strong><del>writage过期了，所以word转公式特别麻烦QAQ。。就直接用图片啦，不知道有一天图床崩了会引起什么反应</del></strong></p>
+<p><strong>后面我又用latex输了</strong></p>
+<p>balabala 不想贴了，不过这里补一个报告pdf</p>
+<p>我们这里讲解Adaboost是如何解决上一节这4个问题的。</p>
+<p>假设我们的训练集样本是</p>
+<p>$$<br>T={(x,y1),(x2,y2),…(xm,ym)}<br>$$<br>训练集的在第k个弱学习器的输出权重为<br>$$<br>D(k)=(wk1,wk2,…wkm);w1i=1m;i=1,2…m<br>$$<br>Adaboost的误差率和其他分类误差率相似，由于多元分类是二元分类的推广，在这里假设是二元分类问题，输出为{-1，1}，则第k个弱分类器Learner k的加权误差率为：<br>$$<br>e_k = P(G_k(x_i) \neq y_i) = \sum\limits_{i=1}^{m}w_{ki}I(G_k(x_i) \neq y_i)<br>$$<br>Adaboost的第k个分类器的权重系数为：<br>$$<br>\alpha_k = \frac{1}{2}log\frac{1-e_k}{e_k}<br>$$<br>从误差率公式和权重系数公式可以看出分离误差率越大,ak越小。假设第k个弱分类器的样本集权重系数为<br>$$<br>D(k) = (w_{k1}, w_{k2}, …w_{km})<br>$$<br>需要得到第k+1个权重系数，对应第k+1个权重系数为：<br>$$<br>w_{k+1,i} = \frac{w_{ki}}{Z_K}exp(-\alpha_ky_iG_k(x_i))<br>$$<br>上式的规范化因子的计算的计算如下：<br>$$<br>Z_k = \sum\limits_{i=1}^{m}w_{ki}exp(-\alpha_ky_iG_k(x_i))<br>$$<br>如图中所示，多个弱学习器还需要一个集合函数将他们合成一个，Adaboost采用的是加权表示法，最终的强分类器为：<br>$$<br>f(x) = sign(\sum\limits_{k=1}^{K}\alpha_kG_k(x))<br>$$<br>分类Adaboost的弱学习器权重系数公式和样本权重更新公式的确定，和从Adaboost的损失函数有关，Adaboost是模型为加法模型，学习算法为前向分步学习算法，损失函数为指数函数的分类问题。加法模型是指最终的强分类器是若干个弱分类器加权平均而得到的，前向分步学习算法是通过一轮轮的弱学习器学习，利用前一个强学习器的结果和当前弱学习器来更新当前的强学习器的模型。第k-1轮的强学习器为：<br>$$<br>f_{k-1}(x) = \sum\limits_{i=1}^{k-1}\alpha_iG_{i}(x)<br>$$<br>而第k轮的强学习器为：<br>$$<br>f_{k}(x) = \sum\limits_{i=1}^{k}\alpha_iG_{i}(x)<br>$$<br>上两式一比较可以得到<br>$$<br>f_{k}(x) = f_{k-1}(x) + \alpha_kG_k(x)<br>$$<br>可见强学习器的确是通过前向分步学习算法一步步而得到的。</p>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyAdaBoost</span>(<span class="hljs-params">BaseEstimator,ClassifierMixin</span>):</span><br>   <br>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span>(<span class="hljs-params">self,weak_clf=<span class="hljs-literal">None</span>,n_estimator=<span class="hljs-number">50</span></span>):</span><br>        self._clfs=[] <span class="hljs-comment"># 弱分类器的列表</span><br>        self._clf_weight=[] <span class="hljs-comment"># 权重列表</span><br>        self._weak_clf=weak_clf <span class="hljs-comment"># 弱学习器选择</span><br>        self._n_estimator=n_estimator <span class="hljs-comment"># 最大基学习器数量</span><br>        <br>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_para_ts</span>(<span class="hljs-params">self, deep = <span class="hljs-literal">False</span></span>):</span>  <br>        <span class="hljs-keyword">return</span>&#123;  <br>            <span class="hljs-string">&quot;weak_clf&quot;</span>: self._weak_clf,  <br>            <span class="hljs-string">&quot;n_estimator&quot;</span>: self._n_estimator,  <br>        &#125;  <br><br>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">clear</span>(<span class="hljs-params">self</span>):</span>  <br>        self._clfs.clear()  <br>        self._clf_weight.clear()<br>  <br>        <br>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fit</span>(<span class="hljs-params">self, X, y</span>):</span><br>        self.clear()<br><br>        n=<span class="hljs-built_in">len</span>(X)<br>        <span class="hljs-comment"># 计算第一个权重</span><br>        <span class="hljs-comment"># 此后的权重通过计算迭代的得到，见权重计算公式</span><br>        avg_weight=np.ones(n) / n<br>      <br>        <span class="hljs-comment"># 基学习器的最大数量self.n_estimator为迭代次数       </span><br>        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(self._n_estimator):<br>            <br>            <span class="hljs-comment"># 使用弱分类器的fit方法训练弱分类器</span><br>            self._weak_clf=self._weak_clf.fit(X, y,sample_weight=np.array(avg_weight))<br>            <br>            <span class="hljs-comment"># 调用弱分类器的predict方法进行预测</span><br>            y_pred=self._weak_clf.predict(X)<br>            <br>            <span class="hljs-comment"># 计算加权错误率e_k</span><br>            <span class="hljs-comment"># 公式如上文e_k的计算，这里考虑到数值的稳定性</span><br>            eps = <span class="hljs-number">1e-12</span>  <br>            e_k = <span class="hljs-built_in">min</span>(<span class="hljs-built_in">max</span>((y_pred != y).dot(avg_weight[:, <span class="hljs-literal">None</span>])[<span class="hljs-number">0</span>], eps), <span class="hljs-number">1</span> - eps)<br>            <br>            <span class="hljs-comment"># 计算该弱分类器的权重a_t</span><br>            <span class="hljs-comment"># 在公式中反映为 1/2*log&#123;(1-e_k)/e_k&#125;</span><br>            a_t=<span class="hljs-number">0.5</span> * np.log((<span class="hljs-number">1</span> - e_k) / (e_k))  <br>            <br>            <span class="hljs-comment"># 更新样本权重</span><br>            <span class="hljs-comment">#通过第k+1个权重公式得到</span><br>            avg_weight *= np.exp(-a_t * y* y_pred)<br>            avg_weight /= np.<span class="hljs-built_in">sum</span>(avg_weight)<br>            <br>            <span class="hljs-comment"># 记录分类器和权重</span><br>            self._clf_weight.append(a_t)<br>            self._clfs.append(deepcopy(self._weak_clf))<br>        <span class="hljs-keyword">return</span> self<br>            <br>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">predict</span>(<span class="hljs-params">self,x</span>):</span><br>        result=np.zeros(<span class="hljs-built_in">len</span>(x))<br>        <br>        <span class="hljs-comment"># 集合函数</span><br>        <span class="hljs-comment"># 按权重求和</span><br>        <span class="hljs-keyword">for</span> clf, a_t <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(self._clfs, self._clf_weight):<br>            result += a_t * clf.predict(x) <br>        <span class="hljs-comment"># 将结果化为1 0 -1</span><br>        result-=<span class="hljs-number">0.5</span><br>        prediction = np.sign(result)<br>        prediction[prediction == -<span class="hljs-number">1</span>] = <span class="hljs-number">0</span><br>        <span class="hljs-keyword">return</span> prediction<br><br><span class="hljs-comment"># 检测Adaboost的树深从8-12的代码</span><br><span class="hljs-keyword">from</span> sklearn.tree <span class="hljs-keyword">import</span> DecisionTreeClassifier<br><span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> cross_val_predict<br><span class="hljs-keyword">from</span> sklearn.metrics <span class="hljs-keyword">import</span> *<br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">8</span>,<span class="hljs-number">13</span>):<br>    clf=DecisionTreeClassifier(max_depth=i)<span class="hljs-comment"># 最大深度</span><br>    AdaBoostClf=MyAdaBoost(weak_clf=clf)<br>    AdaBoostClf.fit(dota2x,dota2y)<br>    prediction1=AdaBoostClf.predict(dota2x)<br>    <span class="hljs-keyword">from</span> sklearn.metrics <span class="hljs-keyword">import</span> mean_absolute_error<br>    <span class="hljs-keyword">from</span> sklearn.metrics <span class="hljs-keyword">import</span> mean_squared_error<br>    print(i,<span class="hljs-string">&quot;:&quot;</span>,mean_absolute_error(dota2y,prediction1),mean_squared_error(dota2y,prediction1))<br><br></code></pre></td></tr></table></figure>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/Assignment/">Assignment</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！</p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/01/30/GrapAllOfRedPackets/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">实践|Auto.js8基于屏幕识别的vx抢红包脚本</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2022/01/27/mysqlAssginment-8/">
+                        <span class="hidden-mobile">Assignment|MySQL数据库压力测试</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+              <!-- Comments -->
+              <article class="comments" id="comments">
+                
+                
+  <div id="vcomments"></div>
+  <script type="text/javascript">
+    Fluid.utils.waitElementVisible('vcomments', function() {
+      Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js', function () {
+        new Valine({
+          el: "#vcomments",
+          app_id: "NWytlCMJI03CQOQYOFuI0nNx-gzGzoHsz",
+          app_key: "dfBdcYBLVYgWf12l7QnVV3wC",
+          placeholder: "说点什么",
+          path: window.location.pathname,
+          avatar: "retro",
+          meta: ["nick","mail","link"],
+          pageSize: "10",
+          lang: "zh-CN",
+          highlight: false,
+          recordIP: false,
+          serverURLs: "",
+        });
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the
+    <a target="_blank" href="https://valine.js.org" rel="nofollow noopener noopener">comments powered by Valine.</a>
+  </noscript>
+
+
+              </article>
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://www.auswitz.top" target="_blank" rel="nofollow noopener"><span>Aus</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+<!-- SCRIPTS -->
+
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/debouncer.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.0/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js" ></script>
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      var inputArea = document.querySelector("#local-search-input");
+      inputArea.onclick = function () {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+        this.onclick = null
+      }
+    })()
+  </script>
+
+
+
+
+
+  
+
+  
+    <!-- MathJax -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        options: {
+          renderActions: {
+            findScript: [10, doc => {
+              document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                const display = !!node.type.match(/; *mode=display/);
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                const text = document.createTextNode('');
+                node.parentNode.replaceChild(text, node);
+                math.start = { node: text, delim: '', n: 0 };
+                math.end = { node: text, delim: '', n: 0 };
+                doc.math.push(math);
+              });
+            }, '', false],
+            insertedScript: [200, () => {
+              document.querySelectorAll('mjx-container').forEach(node => {
+                let target = node.parentNode;
+                if (target.nodeName.toLowerCase() === 'li') {
+                  target.parentNode.classList.add('has-jax');
+                }
+              });
+            }, '', false]
+          }
+        }
+      };
+    </script>
+
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-svg.js" ></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+
+<script type="text/javascript" src="\js\snow.js"></script>
+<script type="text/javascript" src="\js\click.js"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":140,"height":260},"mobile":{"show":true},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
