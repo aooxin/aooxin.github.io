@@ -1,0 +1,791 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/icon/IMG_0896%20%281%29.png">
+  <link rel="icon" type="image/png" href="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/icon/IMG_0896%20%281%29.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="">
+  <meta name="author" content="max">
+  <meta name="keywords" content="">
+  <title>Notebook｜CUDA学习笔记 - Aoxin Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.4.0/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"www.auswitz.top","root":"/","version":"1.8.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"onlypost":false},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.3.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Aoxin`s Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                简历
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" href="javascript:">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://pic.downk.cc/item/5ff6ec6a3ffa7d37b3561203.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Notebook｜CUDA学习笔记">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2024-03-17 10:28" pubdate>
+        2024年3月17日 上午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      4.4k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      49
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Notebook｜CUDA学习笔记</h1>
+            
+            <div class="markdown-body">
+              <p>最近一直在做高性能计算的事，但是从来没了解过 CUDA 相关的内容，刚好看到小彭老师的课，记录一下学到的东西。</p>
+<h1 id="HelloWorld"><a href="#HelloWorld" class="headerlink" title="HelloWorld"></a>HelloWorld</h1><ul>
+<li>Cmake中启用 CUDA 支持<ul>
+<li>最新版的 CMake（3.18 以上），只需在 LANGUAGES 后面加上 CUDA 即可启用。然后在 add_executable 里直接加你的 .cu 文件，和 .cpp 一样。</li>
+</ul>
+</li>
+<li>CUDA 编译器兼容 C++17<ul>
+<li>原来在使用 OpenCL 的使用，如果使用 vivado 的 HLS，host 和 device 的语法不能完全兼容，传递参数和参数的使用很不方便。</li>
+<li>并且host 代码和 device 代码写在同一个文件内，这是 OpenCL 做不到的。</li>
+</ul>
+</li>
+<li>编写一段在 GPU 上运行的代码<ul>
+<li>CUDA 的核函数编写很方便，前面加上 __global__ 修饰符，即可让他在 GPU 上执行。但是调用的时候需要用 kernel&lt;&lt;&lt;1, 1&gt;&gt;&gt;() 这样的三重尖括号语法。</li>
+<li>另外GPU 与 CPU 之间的通信是<strong>异步</strong>的，所以需要调用cudaDeviceSynchronize()。让 CPU 陷入等待，等 GPU 完成队列的所有任务后再返回。从而能够在 main 退出前等到 kernel 在 GPU 上执行完。同样因为这个异步通信，不能有返回值。</li>
+<li>__device__ 则用于定义设备函数，他在 GPU 上执行，但是从 GPU 上调用的，而且不需要三重尖括号，和普通函数用起来一样，可以有参数，有返回值。host 可以调用 global；global 可以调用 device；device 可以调用 device。要注意的是默认情况下 GPU 函数必须定义在同一个文件里。如果你试图分离声明和定义，调用另一个文件里的 __device__ 或 __global__ 函数，就会出错。</li>
+<li>inline 在现代 C++ 中的效果是声明一个函数为 weak 符号，和性能优化意义上的内联无关。CUDA 编译器提供了一个“私货”关键字：__inline__ 来声明一个函数为内联。</li>
+<li>同样的，__hos__ 则相反，将函数定义在 CPU 上。如果不指定设备修饰符的话，就是默认 CPU 函数。如果这两个修饰符连用，就是 CPU、GPU 都可以调用。另外<strong>constexpr</strong>会自动变成CPU、GPU 都可以调用的函数。但是实际上也并不能完全替代，constexpr毕竟是代表着编译期间求职，遇到 print 一类的就不是很好使。</li>
+<li>另外从 Kelper 架构开始，核函数调用核函数是被支持的__global__ 里可以调用另一个 __global__。</li>
+</ul>
+</li>
+<li>通过 #ifdef 指令针对 CPU 和 GPU 生成不同的代码<ul>
+<li>CUDA 具有多段编译的特点，一段代码他会先送到 CPU 上的编译器，再送到 GPU 的编译器，最后链接成同一个文件。GPU 的编译模式下，会定义__CUDA_ARCH__这个宏（host、device 混用的话，这个宏有点方便） __CUDA_ARCH__是一个整数，代表GPU 的架构版本号是多少。像下面的就可以控制不同版本使用不同的代码。</li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702162016228.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702162016228" style="zoom: 33%;" /></li>
+<li>可以用 CMAKE_CUDA_ARCHITECTURES 这个变量，设置要针对哪个架构生成 GPU 指令码。如果不指定，编译器默认的版本号是 52，他是针对 GTX900 系列显卡的。也可以指定多个版本号，之间用分号分割。</li>
+</ul>
+</li>
+</ul>
+<h1 id="线程与板块"><a href="#线程与板块" class="headerlink" title="线程与板块"></a>线程与板块</h1><ul>
+<li>三重尖括号<ul>
+<li>&lt;&lt;&lt;板块数量，每个板块中的线程数量&gt;&gt;&gt;</li>
+</ul>
+</li>
+<li>板块、线程<ul>
+<li>板块的编号可以用 blockIdx.x 获取。板块的总数可以用 gridDim.x 获取。</li>
+<li>板块之间是高度并行的，不保证执行的先后顺序。</li>
+<li>当前线程在板块中的编号：threadIdx</li>
+<li>当前板块中的线程数量：blockDim</li>
+<li>当前板块的编号：blockIdx</li>
+<li>总的板块数量：gridDim</li>
+<li>从属关系：线程＜板块＜网格</li>
+<li>实际上 GPU 的板块相当于 CPU 的线程，GPU 的线程相当于 CPU 的SIMD，可以这样理解，但不完全等同。</li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702163845832.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702163845832" style="zoom:50%;" /></li>
+</ul>
+</li>
+<li>CUDA 也支持三维的板块和线程区间。<ul>
+<li>只要在三重尖括号内指定的参数改成 dim3 类型即可。dim3 的构造函数就是接受三个无符号整数（unsigned int）非常简单。</li>
+<li>实际上一维的 &lt;&lt;&lt;m, n&gt;&gt;&gt; 不过是 &lt;&lt;&lt;dim3(m, 1, 1), dim3(n, 1, 1)&gt;&gt;&gt; 的简写而已。同样二维也是支持的。</li>
+</ul>
+</li>
+</ul>
+<h1 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h1><ul>
+<li>如何从核函数里返回数据？<ul>
+<li>由于调用是异步的，所以不能直接通过 return来返回数据。那怎么得到数据呢？</li>
+<li>可以通过指针，但是要确定在同一块设备上，GPU 上就要是显存分配的空间。</li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702165733213.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702165733213" style="zoom:50%;" /></li>
+<li>但是反之，如果这个操作处理完了怎么取得这个值？CPU 显然也无法直接访问 GPU 显存上的变量。因此可以用 cudaMemcpy，他能够在 GPU 和 CPU 内存之间拷贝数据。这里我们希望把 GPU 上的内存数据拷贝到 CPU 内存上，也就是从设备内存(device)到主机内存(host)，因此第四个参数指定为 cudaMemcpyDeviceToHost。同理，还有 cudaMemcpyHostToDevice 和 cudaMemcpyDeviceToDevice。要注意的是cudaMemcpy 会自动同步</li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702165944038.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702165944038" style="zoom:50%;" /></li>
+</ul>
+</li>
+<li>统一内存地址技术<ul>
+<li>比较新的显卡上面支持统一内存地址技术。只需把 cudaMalloc 换成 cudaMallocManaged 即可，释放时也是通过 cudaFree。这样分配出来的地址，不论在 CPU 还是 GPU 上都是一模一样的，都可以访问。而且拷贝也会自动按需进行（当从 CPU 访问时），无需手动调用 cudaMemcpy，大大方便了编程人员，特别是含有指针的一些数据结构。统一内存是从 Pascal 架构开始支持的，也就是 GTX9 开头及以上。虽然方便，但并非完全没有开销，有条件的话还是尽量用分离的设备内存和主机内存吧。</li>
+</ul>
+</li>
+</ul>
+<h1 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h1><ul>
+<li>分配数组<ul>
+<li>如 malloc 一样，可以用 cudaMalloc 配合 n * sizeof(int)，分配一个大小为 n 的整型数组。这样就会有 n 个连续的 int 数据排列在内存中，而 arr 则是指向其起始地址。然后把 arr 指针传入 kernel，即可在里面用 arr[i] 访问他的第 i 个元素。</li>
+<li>可以利用 GPU 的优势，多个线程并行的给数组赋值<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702184800416.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702184800416" style="zoom:50%;" /></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>网格跨步循环<ul>
+<li>无论调用者指定了多少个线程（blockDim），都能自动根据给定的 n 区间循环，不会越界，也不会漏掉几个元素。这样一个 for 循环非常符合 CPU 上常见的 parallel for 的习惯，又能自动匹配不同的 blockDim，看起来非常方便。下面是只考虑线程的网格跨步循环。<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702185050587.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702185050587" style="zoom:50%;" /></li>
+</ul>
+</li>
+<li>当然同样的也可以考虑不同板块<ul>
+<li>核函数内部，用之前说到的 blockDim.x * blockIdx.x + threadIdx.x 来获取线程在整个网格中编号。因此，我们可以用 n / 128 作为 gridDim，这样总的线程数刚好的 n，实现了每个线程负责处理一个元素。</li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702185413346.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702185413346" style="zoom:50%;" /></li>
+<li>但是上面的话，如果不是可以被整除的话，最后几个数会被遗忘。所以选择向上取整的方法去做。</li>
+<li>下面是线程板块都考虑的网格跨步循环<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702185615377.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702185615377" style="zoom:50%;" />
+
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="C-封装"><a href="#C-封装" class="headerlink" title="C++封装"></a>C++封装</h1><ul>
+<li><p>sdt::vector的第二参数</p>
+<ul>
+<li><p>有两个模板参数：std::vector&lt;T, AllocatorT&gt;，（我之前在写推理器的时候也使用到了类似的，只是不清楚原来vector 已经自带了）下面是我原来写的内存分配器的代码，分配 cuda 的也类似。</p>
+</li>
+<li><pre><code class="c++">class CpuAllocator : public DeviceAllocator &#123;
+    public:
+        explicit CpuAllocator() : DeviceAllocator(DeviceType::kDeviceCPU) &#123;&#125;
+
+        void *allocate(size_t size) override;
+
+        void deallocate(void *ptr) override;
+
+        DeviceType device_type() override;
+    &#125;;
+
+void *CpuAllocator::allocate(size_t size) &#123;
+        void *ptr = nullptr;
+        if (size &gt; 0) &#123;
+            ptr = malloc(size);
+        &#125;
+        return ptr;
+    &#125;
+
+    void CpuAllocator::deallocate(void *ptr) &#123;
+        if (ptr) &#123;
+            free(ptr);
+        &#125;
+    &#125;</code></pre>
+</li>
+<li><p>回到 vector，他的第二个模板参数std::allocator&lt;T&gt;同样负责分配和释放内存，初始化 T 对象等。它具有如下几个成员函数</p>
+<ul>
+<li>T *allocate(size_t n)            // 分配长度为n，类型为T的数组，返回其起始地址</li>
+<li>void deallocate(T *p, size_t n)    // 释放长度为n，起始地址为p，类型为T的数组</li>
+</ul>
+</li>
+<li><p>默认的成员函数会调用标准 malloc 和 free 去分配和释放内存空间，所以我们去替换标准 allocator 就可以使得 vector 可以分配和释放显存。</p>
+</li>
+<li><p>另外要注意如果初始化，会调用 CPU 的初始化，所以需要禁用这个vector初始化，所以只需要判断是不是有参数和是否是传统 C 语言类型，如果是就跳过即可，如下图。</p>
+</li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702190722784.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702190722784" style="zoom:50%;" />
+</li>
+</ul>
+</li>
+<li><p>核函数可以是一个模板函数</p>
+<ul>
+<li>CUDA 的优势在于对 C++ 的完全支持。所以 __global__ 修饰的核函数自然也是可以为模板函数的。</li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702190855097.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702190855097" style="zoom:50%;" />
+</li>
+</ul>
+</li>
+<li><p>核函数可以实现函数式编程</p>
+<ul>
+<li>需要注意三点：这里的 Func 不可以是 Func const &amp;，那样会变成一个指向 CPU 内存地址的指针，从而出错。所以 CPU 向 GPU 的传参必须按值传；做参数的这个函数必须是一个有着成员函数 operator() 的类型，即 functor 类。而不能是独立的函数，否则报错。；这个函数必须标记为 __device__，即 GPU 上的函数，否则会变成 CPU 上的函数。<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702191105203.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702191105203" style="zoom:50%;" /></li>
+</ul>
+</li>
+<li>另外也可以用 lambda 表达式，但是需要开启--extended-lambda编译开关<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702191157761.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702191157761" style="zoom:50%;" /></li>
+<li>另外如果用 [&amp;] 捕获变量是会出错的，毕竟这时候捕获到的是堆栈（CPU内存）上的变量 arr 本身，而不是 arr 所指向的内存地址（GPU内存）这个 lambda 表达式的捕获有点复杂。也不可以直接使用[=] 按值捕获（因为vector 的拷贝是深拷贝（绝大多数C++类都是深拷贝，除了智能指针和原始指针）。这样只会把 vector 整个地拷贝到 GPU 上！而不是浅拷贝其起始地址指针。）</li>
+<li><strong>正确的捕获做法是先获取 arr.data() 的值到 arr_data 变量，然后用 [=] 按值捕获 arr_data，函数体里面也通过 arr_data 来访问 arr。因为 data() 返回一个起始地址的原始指针，而原始指针是浅拷贝的，所以可以拷贝到 GPU 上，让他访问。这样和之前作为核函数参数是一样的，不过是作为 Func 结构体统一传入了。</strong><ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702191643122.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702191643122" style="zoom:50%;" />
+
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="数学运算"><a href="#数学运算" class="headerlink" title="数学运算"></a>数学运算</h1><ul>
+<li>经典案例，并行的求 sin 值<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702191810745.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702191810745" style="zoom:50%;" /></li>
+<li>可以看到上面就是很标准的跨步网格循环。</li>
+<li>sinf 是 sin 的 float 型。__sinf 是GPU intrinstics，精度相当于 GLSL 里的那种。适合对精度要求不高，但有性能要求的图形学任务。很快但是相比较而言不准确。如果开启了<strong>--use_fast_math</strong>编译器选项，那么所有对 sinf 的调用都会自动被替换成 __sinf。</li>
+</ul>
+</li>
+<li><strong>SAXPY</strong>（Scalar A times X Plus Y）<ul>
+<li>标量 A 乘 X 加 Y。</li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702192407003.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702192407003" style="zoom:50%;" />
+
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="thrust库"><a href="#thrust库" class="headerlink" title="thrust库"></a>thrust库</h1><p>thrust 库是 nvidia 对stl 的 cuda 化，thrust 模板函数的特点：根据容器类型，自动决定在 CPU 还是 GPU 执行</p>
+<ul>
+<li><p>CUDA 官方提供的 thrust::universal_vector</p>
+<ul>
+<li>universal_vector 会在统一内存上分配，因此不论 GPU 还是 CPU 都可以直接访问到。因此就用他们的好啦。</li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702192610954.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702192610954" style="zoom:50%;" /></li>
+</ul>
+</li>
+<li><p>device_vector和 host_vector</p>
+<ul>
+<li>而 device_vector 则是在 GPU 上分配内存，host_vector 在 CPU 上分配内存。</li>
+<li>但是优势在于可以通过 = 运算符在 device_vector 和 host_vector 之间拷贝数据，他会自动帮你调用 cudaMemcpy，非常智能。</li>
+</ul>
+</li>
+<li><p>thrust::generate</p>
+<ul>
+<li>thrust 提供了很多类似于标准库里的模板函数，比如 thrust::generate(b, e, f) 对标 std::generate，用于批量调用 f() 生成一系列（通常是随机）数，写入到 [b, e) 区间。</li>
+</ul>
+</li>
+<li><p>thrust::for_each</p>
+<ul>
+<li>还有 thrust::for_each(b, e, f) 对标 std::for_each。他会把 [b, e) 区间的每个元素 x 调用一遍 f(x)。这里的 x 实际上是一个引用。如果 b 和 e 是常值迭代器则是个常引用，可以用 cbegin()，cend() 获取常值迭代器。</li>
+<li>当然还有 thrust::reduce，thrust::sort，thrust::find_if，thrust::count_if，thrust::reverse，thrust::inclusive_scan 等。</li>
+</ul>
+<h1 id="原子操作"><a href="#原子操作" class="headerlink" title="原子操作"></a>原子操作</h1></li>
+</ul>
+<p>并行操作总会带来锁的问题</p>
+<ul>
+<li>数组求和<ul>
+<li>如何并行地对数组进行求和操作？</li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702193117078.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" style="zoom:50%;" /></li>
+<li>显而易见，取数与计算并写回不是原子操作导致了这个问题。因此使用 CUDA 提供的atomicAdd就可以处理这个问题：atomicAdd(dst, src) 和 *dst += src 差不多。<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702194636012.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702194636012" style="zoom:50%;" /></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>还有不少其他的原子操作，以后遇到再补充<ul>
+<li>atomicAdd(dst, src)：<em>dst += src</em></li>
+<li><em>atomicSub(dst, src)：</em>dst -= src</li>
+<li>atomicOr(dst, src)：<em>dst |= src</em></li>
+<li><em>atomicAnd(dst, src)：</em>dst &amp;= src</li>
+<li>atomicXor(dst, src)：<em>dst ^= src</em></li>
+<li><em>atomicMax(dst, src)：</em>dst = std::max(<em>dst, src)</em></li>
+<li><em>atomicMin(dst, src)：</em>dst = std::min(*dst, src)</li>
+</ul>
+</li>
+<li>原子操作最直观带来的就是速度问题。</li>
+</ul>
+<h1 id="板块与共享内存"><a href="#板块与共享内存" class="headerlink" title="板块与共享内存"></a>板块与共享内存</h1><ul>
+<li>为什么需要分出板块的概念呢？<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702195410450.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702195410450" style="zoom:50%;" /></li>
+<li>GPU 是由多个流式多处理器（SM）组成的。每个 SM 可以处理一个或多个板块。SM 又由多个流式单处理器（SP）组成。每个 SP 可以处理一个或多个线程。每个 SM 都有自己的一块共享内存（shared memory），他的性质类似于 CPU 中的缓存——和主存相比很小，但是很快，用于缓冲临时数据。通常板块数量总是大于 SM 的数量，这时英伟达驱动就会在多个 SM 之间调度你提交的各个板块。正如操作系统在多个 CPU 核心之间调度线程那样。不过有一点不同，GPU 不会像 CPU 那样做时间片轮换——板块一旦被调度到了一个 SM 上，就会一直执行，直到他执行完退出，这样的好处是不存在保存和切换上下文（寄存器，共享内存等）的开销，毕竟 GPU 的数据量比较大，禁不起这样切换来切换去。一个 SM 可同时运行多个板块，这时多个板块共用同一块共享内存（每块分到的就少了）。而板块内部的每个线程，则是被进一步调度到 SM 上的每个 SP。</li>
+</ul>
+</li>
+<li>无原子操作的求和<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702200028885.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702200028885" style="zoom:50%;" /></li>
+<li>声明 sum 为比原数组小 1024 倍的数组。然后在 GPU 上启动 n / 1024 个线程，每个负责原数组中 1024 个数的求和，然后写入到 sum 的对应元素中去。因为每个线程都写入了不同的地址，所以不存在任何冲突，也不需要原子操作了。然后求出的大小为 n / 1024 的数组，已经足够小了，可以直接在 CPU 上完成最终的求和。也就是 GPU 先把数据尺寸缩减 1024 倍到 CPU 可以接受的范围内，然后让 CPU 完成的思路。</li>
+<li>本质上就是牺牲了最后一点时间以及空间，换来需要原子操作的这部分时间。但是每个线程中仍然是明显的串行操作。因此可以采用分布缩减法来改造成真正的并行（这个有点像计算机组成原理里面一种访存方式）<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702202043373.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702202043373" style="zoom:50%;" /></li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702202141034.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702202141034" style="zoom:50%;" /></li>
+<li>另外这样修改需要把 local_sum 数组声明为 volatile 禁止编译器优化</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>线程组分歧<ul>
+<li>GPU 线程组（warp）中 32 个线程实际是绑在一起执行的，就像 CPU 的 SIMD 那样。因此如果出现分支（if）语句时，如果 32 个 cond 中有的为真有的为假，则会导致两个分支都被执行！不过在 cond 为假的那几个线程在真分支会避免修改寄存器和访存，产生副作用。而为了避免会产生额外的开销。因此建议 GPU 上的 if 尽可能 32 个线程都处于同一个分支，要么全部真要么全部假，否则实际消耗了两倍时间！<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702202332465.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702202332465" style="zoom:50%;" /></li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702202340263.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702202340263" style="zoom:50%;" /></li>
+</ul>
+</li>
+<li>因此前面的代码可以修改为以下的形式<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702202443489.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702202443489" style="zoom:50%;" /></li>
+</ul>
+</li>
+<li>虽然用了 atomicAdd 按理说是非常低效的，然而却没有低效，这是因为编译器自动优化成刚刚用 BLS 的数组求和了！可以看到他优化后的效率和我们的 BLS 相仿，甚至还要快一些！</li>
+</ul>
+</li>
+</ul>
+<h1 id="共享内存进阶"><a href="#共享内存进阶" class="headerlink" title="共享内存进阶"></a>共享内存进阶</h1><p>需要对 cuda 的内存管理有更进一步的了解。</p>
+<ul>
+<li>寄存器数量有限<ul>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702203113885.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702203113885" style="zoom:50%;" /></li>
+<li>可以看到每个 SM 都有自己的寄存器，但是如果板块数量过多的话就会出现寄存器打翻现象。导致每个线程能够分配到的寄存器数量急剧缩小。而如果你的程序恰好用到了非常多的寄存器，那就没办法全部装在高效的寄存器仓库里，而是要把一部分“打翻”到一级缓存中，这时对这些寄存器读写的速度就和一级缓存一样，相对而言低效了。若一级缓存还装不下，那会打翻到所有 SM 共用的二级缓存。</li>
+<li>板块中的线程数量过少：延迟隐藏（latency hiding）失效：当线程组陷入内存等待时，可以切换到另一个线程，继续计算，这样一个 warp 的内存延迟就被另一个 warp 的计算延迟给隐藏起来了。因此，如果线程数量太少的话，就无法通过在多个 warp 之间调度来隐藏内存等待的延迟，从而低效。</li>
+<li><strong>因此对于使用寄存器较少、访存为主的核函数（例如矢量加法），使用大 blockDim 为宜。反之（例如光线追踪）使用小 blockDim，但也不宜太小。</strong></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/Notebook/">Notebook</a>
+                    
+                      <a class="hover-with-bg" href="/categories/Notebook/%E9%AB%98%E6%80%A7%E8%83%BD%E5%B9%B6%E8%A1%8C%E7%BC%96%E7%A8%8B%E4%B8%8E%E4%BC%98%E5%8C%96/">高性能并行编程与优化</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/%E9%AB%98%E6%80%A7%E8%83%BD/">高性能</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！</p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/03/27/llm/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Intership｜LLM应用从训练到构建</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/03/26/MYSQLNoteBook/">
+                        <span class="hidden-mobile">Notebook|MYSQLNoteBook||数据库系统原理笔记</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+              <!-- Comments -->
+              <article class="comments" id="comments">
+                
+                
+  <div id="vcomments"></div>
+  <script type="text/javascript">
+    Fluid.utils.waitElementVisible('vcomments', function() {
+      Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js', function () {
+        new Valine({
+          el: "#vcomments",
+          app_id: "NWytlCMJI03CQOQYOFuI0nNx-gzGzoHsz",
+          app_key: "dfBdcYBLVYgWf12l7QnVV3wC",
+          placeholder: "说点什么",
+          path: window.location.pathname,
+          avatar: "retro",
+          meta: ["nick","mail","link"],
+          pageSize: "10",
+          lang: "zh-CN",
+          highlight: false,
+          recordIP: false,
+          serverURLs: "",
+        });
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the
+    <a target="_blank" href="https://valine.js.org" rel="nofollow noopener noopener">comments powered by Valine.</a>
+  </noscript>
+
+
+              </article>
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://www.auswitz.top" target="_blank" rel="nofollow noopener"><span>Aus</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+<!-- SCRIPTS -->
+
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/debouncer.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.0/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js" ></script>
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      var inputArea = document.querySelector("#local-search-input");
+      inputArea.onclick = function () {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+        this.onclick = null
+      }
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+
+<script type="text/javascript" src="\js\snow.js"></script>
+<script type="text/javascript" src="\js\click.js"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":140,"height":260},"mobile":{"show":true},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
