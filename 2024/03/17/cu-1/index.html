@@ -265,7 +265,7 @@
 </li>
 <li>通过 #ifdef 指令针对 CPU 和 GPU 生成不同的代码<ul>
 <li>CUDA 具有多段编译的特点，一段代码他会先送到 CPU 上的编译器，再送到 GPU 的编译器，最后链接成同一个文件。GPU 的编译模式下，会定义__CUDA_ARCH__这个宏（host、device 混用的话，这个宏有点方便） __CUDA_ARCH__是一个整数，代表GPU 的架构版本号是多少。像下面的就可以控制不同版本使用不同的代码。</li>
-<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702162016228.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702162016228" style="zoom: 33%;" /></li>
+<li><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240702162016228.png?imageMogr2/format/jpg/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hdXN3aXR6LnRvcC8/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/60/shadow/0/gravity/south/dx/0/dy/5" srcset="/img/loading.gif" alt="image-20240702162016228"></li>
 <li>可以用 CMAKE_CUDA_ARCHITECTURES 这个变量，设置要针对哪个架构生成 GPU 指令码。如果不指定，编译器默认的版本号是 52，他是针对 GTX900 系列显卡的。也可以指定多个版本号，之间用分号分割。</li>
 </ul>
 </li>
