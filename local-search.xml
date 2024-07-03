@@ -4,6 +4,33 @@
   
   
   <entry>
+    <title>小技巧｜异构计算中C++ host 部分的性能测试（普通C++程序也适用）</title>
+    <link href="/2024/07/03/cu2/"/>
+    <url>/2024/07/03/cu2/</url>
+    
+    <content type="html"><![CDATA[<p>​    在对项目的某个功能模块进行优化的时候，刚开始都是使用封装好的 Timer 类去测试（再最后也放上 Timer 类的代码），但是只有添加了 Timer 的地方才可以记录到时间，这个记录的粒度非常不好控制，比如测试了整个函数体用时的话，函数体之内用时占比就还需要更详细的测试。</p><p>​    以往在device 端进行测试的时候可以使用 Xilinx 自带的工具查看 timeline，host端优化的时候没有考虑使用类似的工具。这次发现了一个基于 linux  profiling工具 perf 的图形化分析工具FlameGraph。下图是我在该项目的FlameGraph输出。</p><p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20240703153747247.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/10/shadow/0/batch/1/degree/34" alt="image-20240703153747247"></p>]]></content>
+    
+    
+    <categories>
+      
+      <category>xxxxx</category>
+      
+      <category>xxxxx</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>xxxxx</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Intership｜LLM应用从训练到构建</title>
     <link href="/2024/03/27/llm/"/>
     <url>/2024/03/27/llm/</url>
