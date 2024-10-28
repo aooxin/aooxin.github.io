@@ -200,7 +200,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      3.1k 字
+      3.2k 字
     </span>
   
 
@@ -210,7 +210,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      39
+      40
        分钟
     </span>
   
@@ -243,7 +243,7 @@
             <h1 style="display: none">Intership｜LLM应用从训练到构建</h1>
             
             <div class="markdown-body">
-              <p>以下有很多东西已脱密处理，可读性会降低。</p>
+              <p>以下有很多东西已脱密处理，可读性会降低。在咨询+1 得到同意后，把一些流程记录下来。</p>
 <h1 id="1-LLM预训练中的参数设置以及训练设置"><a href="#1-LLM预训练中的参数设置以及训练设置" class="headerlink" title="1 LLM预训练中的参数设置以及训练设置"></a>1 LLM预训练中的参数设置以及训练设置</h1><h2 id="1-1-参数设置"><a href="#1-1-参数设置" class="headerlink" title="1.1 参数设置"></a>1.1 参数设置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">CUDA_VISIBLE_DEVICES=0 python src/train_bash.py \ --stage sft \ --model_name_or_path /model/baichuan2/Baichuan2-7B-chat \ --do_train \ --dataset classify\ --template baichuan2 \ --finetuning_type lora \ --lora_target all \ --output_dir /cephfs/home/aooxin/LLM/LLM_model/classify_3_1_1 \ --overwrite_cache \ --per_device_train_batch_size 1 \ --per_device_eval_batch_size 1 \ --gradient_accumulation_steps 4 \ --lr_scheduler_type cosine \ --logging_steps 10 \ --save_steps 100 \ --lora_rank 64 \ --lora_alpha 128 \ --learning_rate 5e-5 \ --num_train_epochs 300 \ --plot_loss \ --fp16<br></code></pre></td></tr></table></figure>
 <ul>
 <li>stage：指令监督微调</li>
