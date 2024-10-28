@@ -1,0 +1,547 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/icon/IMG_0896%20%281%29.png">
+  <link rel="icon" type="image/png" href="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/icon/IMG_0896%20%281%29.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="">
+  <meta name="author" content="max">
+  <meta name="keywords" content="">
+  <title>Intership｜Paddle的amp pass（混合精度 pass）新旧迭代中遇到的问题 - Aoxin Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.4.0/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"www.auswitz.top","root":"/","version":"1.8.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"onlypost":false},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.3.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Aoxin`s Blog</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                简历
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" href="javascript:">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://pic.downk.cc/item/5ff6ec6a3ffa7d37b3561203.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Intership｜Paddle的amp pass（混合精度 pass）新旧迭代中遇到的问题">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2024-10-28 22:32" pubdate>
+        2024年10月28日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.5k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      17
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Intership｜Paddle的amp pass（混合精度 pass）新旧迭代中遇到的问题</h1>
+            
+            <div class="markdown-body">
+              <h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><p>一直都想要参加一些大项目的开源活动，同时自己也想在 AI inference 上获得更深入的了解，一直在寻找这样一个可以参与的机会。机缘巧合之下在今年参与了 paddle pass 组件的开发，虽然只是其中一个很小的 pass，但是在其中也是收获满满～</p>
+<p>paddle现在的 amp pass还不支持 PIR 的直接使用，就需要经过下面的流程：</p>
+<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028225011825.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028225011825"></p>
+<p>对于一个新生的 PIR 来说，一直使用旧的 pass 去做转化显然是不理想也不能接受的，于是从支持旧 IR 的 pass 到支持PIR 的 pass 就要有一个转化的工作。旧 IR 从一种相对落后的实现迭代到现在的 PIR，有许多工作需要补充，就像 paddle 说的，“PIR灵活可扩展，在底层抽象了一套高度可扩展的基础组件，涵盖Type、Attribute、Op、Trait和Interface，并引入了Dialect的概念，赋予开发者灵活扩展与自由定制的能力，从而提供了全面且稳健的语义表达能力。在模型表示层，通过多Dialect的模块化管理和统一多端表示，实现了训练与推理一体化的全架构统一表示，实现了算子和编译器的无缝衔接，支持自动优化和多硬件适配。在图变换层，通过统一底层模块并简化基础概念，向用户提供了低成本、易用且高性能的开发体验，以及丰富且可插拔的Pass优化机制。飞桨PIR坚守静态单赋值（SSA）原则，确保模型等价于一个有向无环图，并采用Value和Operation对计算图进行抽象，其中Operation代表节点，Value代表边”。</p>
+<p>在我实际使用中，也的确发现了 PIR 相较于旧 IR 的很多优势。如果 amp pass 可以直接工作在PIR 上，那么流程就会变为下面这样：</p>
+<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028230357527.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028230357527"></p>
+<p>对于这套流程来说，最终态就是从 PIR model 直接经过 PIR pass 送入执行器推理。</p>
+<h1 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h1><p>旧 IR 的 amp pass 执行流程如下：</p>
+<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028230622643.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028230622643"></p>
+<p>在使用了PIR 后，其中的一些步骤就可以省略。由于PIR 的 SSA 特性，每 个变量只有唯一的赋值点， 所以我们可以把用来设置 Op 唯一标志的这步省略。由于PIR 中引入的这一套Value 和 Operation 的抽象，我们在设置权重和输入输出的精度时不用 在分开做，插入 cast op 也就不 需要再等前两个做完再做。融合 到 ProcessBlock 里，通过修改 op 的attribute 里的精度相关设置以及，设置输出中的 Type 来完成相关功能。PIR amp pass 就变成了下面这样（灰色是可以融合或者删除的步骤）：</p>
+<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028230809409.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028230809409"></p>
+<p>对于 PIR 的 pass 来说，不需要关心上层的实现机制，只需要利用 paddle pir pass 的两种开发机制：DRR 和 Pattern rewrite</p>
+<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028231427016.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028231427016"></p>
+<p>PR 机制只需要可以选择直接继承 pir::Pass，然后自定义接口 Run 去实现匹配功能，比如下面官方给出的常量折叠 pass：</p>
+<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028231642830.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028231642830"></p>
+<p>由此可见，amp pass 的开发也可以借鉴这一点，只需要聚焦 pass 的顶层实现，由于目前的 ir 可能会存在一种循环嵌套的可能性，由此 pass 的实现可以如下,采用Pattern Rewriter机制 ，只要实现CanApplyOn 就可以 End 控制 Run 函数访问到最外层的 op，然后进入后通过递归处理就可以就可以实现对所有 op 的<strong>深度优先遍历</strong>，解决多层循环嵌套的问题。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Run</span><span class="hljs-params">(pir::Operation* op)</span> <span class="hljs-keyword">override</span> </span>&#123;<br>    SubBlockRun(op-&gt;GetParentProgram()-&gt;block());<br>    AddStatistics(op_run_low_precision_.size());<br>  &#125;<br><br><span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">CanApplyOn</span><span class="hljs-params">(pir::Operation* op)</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">override</span> </span>&#123;<br>  <span class="hljs-keyword">return</span> op-&gt;num_regions() &gt; <span class="hljs-number">0</span> &amp;&amp; op-&gt;isa&lt;pir::ModuleOp&gt;() &amp;&amp; place_ == paddle::PlaceType::kGPU &amp;&amp;<br>         (precision_mode_ == phi::DataType::FLOAT16 ||<br>          precision_mode_ == phi::DataType::BFLOAT16);<br>&#125;<br>  <br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">SubOpRun</span><span class="hljs-params">(pir::Operation* op)</span></span>&#123;<br>  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; region : *op) &#123;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; block : region) &#123;<br>      SubBlockRun(&amp;block); <span class="hljs-comment">//subblock</span><br>    &#125;<br>  &#125;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">SubBlockRun</span><span class="hljs-params">(pir::Block* block)</span></span>&#123;<br>  GetOpPrecision(block);<br>  UpdateOpPrecision(block);<br>  pir::Builder builder = pir::Builder(context_, block);<br>  ProcessBlock(block, builder);<br>  cached_cast_ops_.clear();<br>  op_should_not_handle_.clear();<br>  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; op : *block) &#123;<br>    SubOpRun(&amp;op);<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>在完成开发工作之后，还参与到了该 pass 的性能测试中。主要是利用下面这种形式展开性能测试，用paddle自己的 profile 工具，生成可转化的 json 文件，去导出 timeline 、转化成 mysql 去分析。最初没有发现 perfetto 的转化db 文件的功能， 但是后面了解到，用 sql 工具处理数据可以得到很神奇的效果。</p>
+<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028232128061.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028232128061"></p>
+<p>通过这种方式，发现了在使用 paddle-inference-demo 的使用问题并解决，最后得到了下面比较好的 tipc测试结果。</p>
+<p>![image-20241028232632380](/Users/aoxin/Library/Application Support/typora-user-images/image-20241028232632380.png)</p>
+<p>最终在多次代码更新加性能测试后，初步“收敛”了这个 amp pass。</p>
+<h1 id="去往"><a href="#去往" class="headerlink" title="去往"></a>去往</h1><p>这次的工作对我自己的研究生路途也有很重要的启发：</p>
+<ul>
+<li><p>一种优秀的 IR 对于训推工作来说有巨大的便利性，便利性就可能体现在代码编写上或者调试中。在以往我常用的推理框架中不具备这种特性导致推理流程进行的不是很顺畅。</p>
+</li>
+<li><p>接触到 paddle推理的开发，让我对整个推理流程有了新的认识，推理需要精心设计数据的流动，最终在更优的计算资源和时延控制下，产生精确的结果，让算法真正从理论走向实践。</p>
+</li>
+<li><p>优秀的开源项目的确存在一种传承关系，远乐导师的帮助让我快速的融入这个课题，更是让我对 paddle 推理相关有了更深的认识，未来会有更多机会加入到优秀的项目之中。</p>
+</li>
+</ul>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/Intership/">Intership</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/C/">C++</a>
+                    
+                      <a class="hover-with-bg" href="/tags/AI-infra/">AI-infra</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！</p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/04/08/cu2/">
+                        <span class="hidden-mobile">小技巧｜异构计算中C++ host 部分的性能测试（普通C++程序也适用）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+              <!-- Comments -->
+              <article class="comments" id="comments">
+                
+                
+  <div id="vcomments"></div>
+  <script type="text/javascript">
+    Fluid.utils.waitElementVisible('vcomments', function() {
+      Fluid.utils.createScript('https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js', function () {
+        new Valine({
+          el: "#vcomments",
+          app_id: "NWytlCMJI03CQOQYOFuI0nNx-gzGzoHsz",
+          app_key: "dfBdcYBLVYgWf12l7QnVV3wC",
+          placeholder: "说点什么",
+          path: window.location.pathname,
+          avatar: "retro",
+          meta: ["nick","mail","link"],
+          pageSize: "10",
+          lang: "zh-CN",
+          highlight: false,
+          recordIP: false,
+          serverURLs: "",
+        });
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the
+    <a target="_blank" href="https://valine.js.org" rel="nofollow noopener noopener">comments powered by Valine.</a>
+  </noscript>
+
+
+              </article>
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://www.auswitz.top" target="_blank" rel="nofollow noopener"><span>Aus</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+<!-- SCRIPTS -->
+
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/debouncer.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.0/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js" ></script>
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      var inputArea = document.querySelector("#local-search-input");
+      inputArea.onclick = function () {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+        this.onclick = null
+      }
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+
+<script type="text/javascript" src="\js\snow.js"></script>
+<script type="text/javascript" src="\js\click.js"></script>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":140,"height":260},"mobile":{"show":true},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
