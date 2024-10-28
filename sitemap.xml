@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://www.auswitz.top/2020/01/28/2021-1-hello-world/</loc>
+    
+    <lastmod>2024-10-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://www.auswitz.top/2024/10/28/amp-pass/</loc>
     
     <lastmod>2024-10-28</lastmod>
@@ -12,15 +21,6 @@
   
   <url>
     <loc>http://www.auswitz.top/2024/03/27/llm/</loc>
-    
-    <lastmod>2024-10-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://www.auswitz.top/2020/01/28/2021-1-hello-world/</loc>
     
     <lastmod>2024-10-28</lastmod>
     
