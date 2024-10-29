@@ -285,7 +285,7 @@
 <li><p>正则表达式搜索、使用search()方法搜索、把包含a的都拿出来</p>
  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> bs4 <span class="hljs-keyword">import</span> BeautifulSoup<br><span class="hljs-keyword">import</span> re<br><br>f = <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;E:\\baidu.html&quot;</span>, <span class="hljs-string">&quot;rb&quot;</span>)<br>html = f.read().decode(<span class="hljs-string">&quot;utf-8&quot;</span>)<br>bs = BeautifulSoup(html, <span class="hljs-string">&quot;html.parser&quot;</span>)<br><br>t_list = bs.find_all(re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">&quot;a&quot;</span>))<br>print(t_list)<br></code></pre></td></tr></table></figure></li>
 <li><p>方法：传入一个函数，根据函数的要求来搜索</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> bs4 <span class="hljs-keyword">import</span> BeautifulSoup<br><span class="hljs-keyword">import</span> re<br><br>f = <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;E:\\baidu.html&quot;</span>, <span class="hljs-string">&quot;rb&quot;</span>)<br>html = f.read().decode(<span class="hljs-string">&quot;utf-8&quot;</span>)<br>bs = BeautifulSoup(html, <span class="hljs-string">&quot;html.parser&quot;</span>)<br><br><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">is_name_exist</span>(<span class="hljs-params">tag</span>):</span><br>    <span class="hljs-keyword">return</span> tag.<span class="hljs-built_in">hasattr</span>(<span class="hljs-string">&quot;name&quot;</span>)<br><br>t_list = bs.find_all(is_name_exist)<br><br>print(t_list)<br></code></pre></td></tr></table></figure></li>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> bs4 <span class="hljs-keyword">import</span> BeautifulSoup<br><span class="hljs-keyword">import</span> re<br>    <br>f = <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;E:\\baidu.html&quot;</span>, <span class="hljs-string">&quot;rb&quot;</span>)<br>html = f.read().decode(<span class="hljs-string">&quot;utf-8&quot;</span>)<br>bs = BeautifulSoup(html, <span class="hljs-string">&quot;html.parser&quot;</span>)<br>    <br><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">is_name_exist</span>(<span class="hljs-params">tag</span>):</span><br>    <span class="hljs-keyword">return</span> tag.<span class="hljs-built_in">hasattr</span>(<span class="hljs-string">&quot;name&quot;</span>)<br>    <br>t_list = bs.find_all(is_name_exist)<br>    <br>print(t_list)<br></code></pre></td></tr></table></figure></li>
 </ol>
 </li>
 <li><p>kwargs_____参数</p>
@@ -333,15 +333,7 @@
                   <div class="post-meta">
                     <i class="iconfont icon-tags"></i>
                     
-                      <a class="hover-with-bg" href="/tags/python/">python</a>
-                    
-                      <a class="hover-with-bg" href="/tags/bs4/">bs4</a>
-                    
-                      <a class="hover-with-bg" href="/tags/re/">re</a>
-                    
-                      <a class="hover-with-bg" href="/tags/urllib/">urllib</a>
-                    
-                      <a class="hover-with-bg" href="/tags/xlwt/">xlwt</a>
+                      <a class="hover-with-bg" href="/tags/Python/">Python</a>
                     
                   </div>
                 
