@@ -4,6 +4,31 @@
   
   
   <entry>
+    <title>小芝士|简化OpenCL API梳理说明</title>
+    <link href="/2025/04/13/opencl-base-api/"/>
+    <url>/2025/04/13/opencl-base-api/</url>
+    
+    <content type="html"><![CDATA[<p>OpenCL（Open Computing Language，开放计算语言）：从软件视角看，它是用于异构平台编程的框架；从规范视角看，它是异构并行计算的行业标准，由Khronos Group来维护。</p><p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20250413203220258.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" alt="image-20250413203220258"></p><p>很多组织会基于OpenCL的规范去维护自己的一套runtime api，比如基于OpenCL3.0的<a href="https://github.com/pocl/pocl">PoCL</a>，我在实现的时候也大多是借鉴这个仓库，他是为了应对CPU和Level Zero GPU目标实现的OpenCL实现，再比如Amd、Intel、Nvdia的硬件平台都有基于OpenCL标准的实现。</p><p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20250413203239113.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" alt="image-20250413203239113"></p><p>我们实验室自己的硬件也需要这样一套基于OpenCL标准的基础api实现。我梳理了一下，需要重点实现的API以及对应功能如下：</p><h1 id="基础API说明"><a href="#基础API说明" class="headerlink" title="基础API说明"></a>基础API说明</h1><p>对于我们实验室的硬件来说，期望实现的功能主要有：</p><ol><li>可以面向单platform、单context、多device的异构编程模型；</li><li>支持单个device拥有多个DDR内存的场景；</li><li>场景相对单一，因此api设计可以相对简单，不追求完备的OpenCL标准实现，但需要实现满足我们硬件需求的Interface。</li></ol><h2 id="API-List"><a href="#API-List" class="headerlink" title="API List"></a>API List</h2><p>为了应对上述场景，需要实现的基础API主要有以下几个：</p><table><thead><tr><th>API名称</th><th>功能描述</th></tr></thead><tbody><tr><td>clGetPlatformIDs</td><td>获取平台ID</td></tr><tr><td>clGetDeviceIDs</td><td>获取设备ID</td></tr><tr><td>clCreateContext</td><td>创建上下文</td></tr><tr><td>clCreateCommandQueue</td><td>创建命令队列</td></tr><tr><td>clCreateBuffer</td><td>创建缓冲区</td></tr><tr><td>clEnqueueWriteBuffer</td><td>写入缓冲区</td></tr><tr><td>clEnqueueReadBuffer</td><td>读取缓冲区</td></tr><tr><td>clEnqueueTask</td><td>任务入队</td></tr><tr><td>clSetKernelArg</td><td>设置内核参数</td></tr><tr><td>clCreateKernel</td><td>创建内核</td></tr><tr><td>clReleaseKernel</td><td>释放内核</td></tr><tr><td>clReleaseMemObject</td><td>释放内存对象</td></tr><tr><td>clReleaseCommandQueue</td><td>释放命令队列</td></tr><tr><td>clReleaseContext</td><td>释放上下文</td></tr><tr><td>clReleaseEvent</td><td>释放事件</td></tr></tbody></table><h2 id="Datastruct-List"><a href="#Datastruct-List" class="headerlink" title="Datastruct List"></a>Datastruct List</h2><p>原有OpenCL的数据结构很复杂，面对我们的应用场景，可以实现以下的数据结构：</p><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs abnf">cl_context&#123;<br>    cl_device_id* devices<span class="hljs-comment">;</span><br>    unsigned int num_devices<span class="hljs-comment">;</span><br>&#125;<br></code></pre></td></tr></table></figure><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs abnf">cl_device_id&#123;<br>    cl_device_type device_type<span class="hljs-comment">;</span><br>    cl_ulong global_mem_size<span class="hljs-comment">;</span><br>    void *data<span class="hljs-comment">;</span><br>&#125;<br></code></pre></td></tr></table></figure><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs abnf">cl_command_queue&#123;<br>    cl_context context<span class="hljs-comment">;</span><br>    cl_device_id device<span class="hljs-comment">;</span><br>    cl_command_queue_properties properties<span class="hljs-comment">;</span><br>    cl_event event<span class="hljs-comment">;</span><br>&#125;<br></code></pre></td></tr></table></figure><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs abnf">cl_mem&#123;<br>    cl_context context<span class="hljs-comment">;</span><br>    size_t size<span class="hljs-comment">;</span><br>    void* mem_ptr<span class="hljs-comment">;</span><br>    u64 mem_addr<span class="hljs-comment">;</span><br>    void *data<span class="hljs-comment">;</span><br>&#125;<br></code></pre></td></tr></table></figure><figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs fortran">cl_kernel&#123;<br>    cl_context context;<br>    cl_program <span class="hljs-function"><span class="hljs-keyword">program</span></span>;<br>    const <span class="hljs-built_in">char</span>* <span class="hljs-keyword">name</span>;<br>&#125;<br></code></pre></td></tr></table></figure><p>还有一些比较基础的cl数据结构，都是以快速实现功能为目的设计。如果是针对下面这种情况则是完全够用。</p><p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20250413204118276.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" alt="image-20250413204118276"></p><h1 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h1><p>实验室具体代码暂时是闭源的，后续要是可以补充会放上。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>AI</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Ai-infra</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Intership｜Paddle的amp pass（混合精度 pass）新旧迭代中遇到的问题</title>
     <link href="/2024/10/28/amp-pass/"/>
     <url>/2024/10/28/amp-pass/</url>

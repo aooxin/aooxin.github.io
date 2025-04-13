@@ -17,7 +17,7 @@
   <meta name="description" content="">
   <meta name="author" content="max">
   <meta name="keywords" content="">
-  <title>Intership｜Paddle的amp pass（混合精度 pass）新旧迭代中遇到的问题 - Aoxin Blog</title>
+  <title>小芝士|简化OpenCL API梳理说明 - Aoxin Blog</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
 
@@ -178,7 +178,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="Intership｜Paddle的amp pass（混合精度 pass）新旧迭代中遇到的问题">
+            <span class="h2" id="subtitle" title="小芝士|简化OpenCL API梳理说明">
               
             </span>
 
@@ -188,8 +188,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2024-10-28 22:32" pubdate>
-        2024年10月28日 晚上
+      <time datetime="2025-04-13 19:46" pubdate>
+        2025年4月13日 晚上
       </time>
     </span>
   
@@ -200,7 +200,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.5k 字
+      563 字
     </span>
   
 
@@ -210,7 +210,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      17
+      6
        分钟
     </span>
   
@@ -240,41 +240,98 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Intership｜Paddle的amp pass（混合精度 pass）新旧迭代中遇到的问题</h1>
+            <h1 style="display: none">小芝士|简化OpenCL API梳理说明</h1>
             
             <div class="markdown-body">
-              <h1 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h1><p>一直都想要参加一些大项目的开源活动，同时自己也想在 AI inference 上获得更深入的了解，一直在寻找这样一个可以参与的机会。机缘巧合之下在今年参与了 paddle pass 组件的开发，虽然只是其中一个很小的 pass，但是在其中也是收获满满～</p>
-<p>paddle现在的 amp pass还不支持 PIR 的直接使用，就需要经过下面的流程：</p>
-<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028225011825.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028225011825"></p>
-<p>对于一个新生的 PIR 来说，一直使用旧的 pass 去做转化显然是不理想也不能接受的，于是从支持旧 IR 的 pass 到支持PIR 的 pass 就要有一个转化的工作。旧 IR 从一种相对落后的实现迭代到现在的 PIR，有许多工作需要补充，就像 paddle 说的，“PIR灵活可扩展，在底层抽象了一套高度可扩展的基础组件，涵盖Type、Attribute、Op、Trait和Interface，并引入了Dialect的概念，赋予开发者灵活扩展与自由定制的能力，从而提供了全面且稳健的语义表达能力。在模型表示层，通过多Dialect的模块化管理和统一多端表示，实现了训练与推理一体化的全架构统一表示，实现了算子和编译器的无缝衔接，支持自动优化和多硬件适配。在图变换层，通过统一底层模块并简化基础概念，向用户提供了低成本、易用且高性能的开发体验，以及丰富且可插拔的Pass优化机制。飞桨PIR坚守静态单赋值（SSA）原则，确保模型等价于一个有向无环图，并采用Value和Operation对计算图进行抽象，其中Operation代表节点，Value代表边”。</p>
-<p>在我实际使用中，也的确发现了 PIR 相较于旧 IR 的很多优势。如果 amp pass 可以直接工作在PIR 上，那么流程就会变为下面这样：</p>
-<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028230357527.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028230357527"></p>
-<p>对于这套流程来说，最终态就是从 PIR model 直接经过 PIR pass 送入执行器推理。</p>
-<h1 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h1><p>旧 IR 的 amp pass 执行流程如下：</p>
-<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028230622643.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028230622643"></p>
-<p>在使用了PIR 后，其中的一些步骤就可以省略。由于PIR 的 SSA 特性，每 个变量只有唯一的赋值点， 所以我们可以把用来设置 Op 唯一标志的这步省略。由于PIR 中引入的这一套Value 和 Operation 的抽象，我们在设置权重和输入输出的精度时不用 在分开做，插入 cast op 也就不 需要再等前两个做完再做。融合 到 ProcessBlock 里，通过修改 op 的attribute 里的精度相关设置以及，设置输出中的 Type 来完成相关功能。PIR amp pass 就变成了下面这样（灰色是可以融合或者删除的步骤）：</p>
-<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028230809409.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028230809409"></p>
-<p>对于 PIR 的 pass 来说，不需要关心上层的实现机制，只需要利用 paddle pir pass 的两种开发机制：DRR 和 Pattern rewrite</p>
-<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028231427016.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028231427016"></p>
-<p>PR 机制只需要可以选择直接继承 pir::Pass，然后自定义接口 Run 去实现匹配功能，比如下面官方给出的常量折叠 pass：</p>
-<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028231642830.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028231642830"></p>
-<p>由此可见，amp pass 的开发也可以借鉴这一点，只需要聚焦 pass 的顶层实现，由于目前的 ir 可能会存在一种循环嵌套的可能性，由此 pass 的实现可以如下,采用Pattern Rewriter机制 ，只要实现CanApplyOn 就可以 End 控制 Run 函数访问到最外层的 op，然后进入后通过递归处理就可以就可以实现对所有 op 的<strong>深度优先遍历</strong>，解决多层循环嵌套的问题。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">Run</span><span class="hljs-params">(pir::Operation* op)</span> <span class="hljs-keyword">override</span> </span>&#123;<br>    SubBlockRun(op-&gt;GetParentProgram()-&gt;block());<br>    AddStatistics(op_run_low_precision_.size());<br>  &#125;<br><br><span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">CanApplyOn</span><span class="hljs-params">(pir::Operation* op)</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">override</span> </span>&#123;<br>  <span class="hljs-keyword">return</span> op-&gt;num_regions() &gt; <span class="hljs-number">0</span> &amp;&amp; op-&gt;isa&lt;pir::ModuleOp&gt;() &amp;&amp; place_ == paddle::PlaceType::kGPU &amp;&amp;<br>         (precision_mode_ == phi::DataType::FLOAT16 ||<br>          precision_mode_ == phi::DataType::BFLOAT16);<br>&#125;<br>  <br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">SubOpRun</span><span class="hljs-params">(pir::Operation* op)</span></span>&#123;<br>  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; region : *op) &#123;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; block : region) &#123;<br>      SubBlockRun(&amp;block); <span class="hljs-comment">//subblock</span><br>    &#125;<br>  &#125;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">SubBlockRun</span><span class="hljs-params">(pir::Block* block)</span></span>&#123;<br>  GetOpPrecision(block);<br>  UpdateOpPrecision(block);<br>  pir::Builder builder = pir::Builder(context_, block);<br>  ProcessBlock(block, builder);<br>  cached_cast_ops_.clear();<br>  op_should_not_handle_.clear();<br>  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; op : *block) &#123;<br>    SubOpRun(&amp;op);<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>在完成开发工作之后，还参与到了该 pass 的性能测试中。主要是利用下面这种形式展开性能测试，用paddle自己的 profile 工具，生成可转化的 json 文件，去导出 timeline 、转化成 mysql 去分析。最初没有发现 perfetto 的转化db 文件的功能， 但是后面了解到，用 sql 工具处理数据可以得到很神奇的效果。后面也想补充一篇关于 perfetto 使用的技巧，互联网上关于这个真的很缺，ai inferencer 真的很伤。</p>
-<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028232128061.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028232128061"></p>
-<p>通过这种方式，发现了在使用 paddle-inference-demo 的使用问题并解决，最后得到了下面比较好的 tipc测试结果。</p>
-<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20241028234113104.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20241028234113104"></p>
-<p>最终在多次代码更新加性能测试后，初步“收敛”了这个 amp pass。</p>
-<h1 id="去往"><a href="#去往" class="headerlink" title="去往"></a>去往</h1><p>这次的工作对我自己的研究生路途也有很重要的启发：</p>
-<ul>
-<li><p>一种优秀的 IR 对于训推工作来说有巨大的便利性，便利性就可能体现在代码编写上或者调试中。在以往我常用的推理框架中不具备这种特性导致推理流程进行的不是很顺畅。</p>
-</li>
-<li><p>接触到 paddle推理的开发，让我对整个推理流程有了新的认识，推理需要精心设计数据的流动，最终在更优的计算资源和时延控制下，产生精确的结果，让算法真正从理论走向实践。</p>
-</li>
-<li><p>优秀的开源项目的确存在一种传承关系，远乐导师的帮助让我快速的融入这个课题，更是让我对 paddle 推理相关有了更深的认识，未来会有更多机会加入到优秀的项目之中。</p>
-</li>
-</ul>
-<p>Code: <a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pir/transforms/general/auto_mixed_precision_pass.cc">https://github.com/PaddlePaddle/Paddle/blob/develop/paddle/fluid/pir/transforms/general/auto_mixed_precision_pass.cc</a></p>
+              <p>OpenCL（Open Computing Language，开放计算语言）：从软件视角看，它是用于异构平台编程的框架；从规范视角看，它是异构并行计算的行业标准，由Khronos Group来维护。</p>
+<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20250413203220258.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20250413203220258"></p>
+<p>很多组织会基于OpenCL的规范去维护自己的一套runtime api，比如基于OpenCL3.0的<a target="_blank" rel="noopener" href="https://github.com/pocl/pocl">PoCL</a>，我在实现的时候也大多是借鉴这个仓库，他是为了应对CPU和Level Zero GPU目标实现的OpenCL实现，再比如Amd、Intel、Nvdia的硬件平台都有基于OpenCL标准的实现。</p>
+<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20250413203239113.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20250413203239113"></p>
+<p>我们实验室自己的硬件也需要这样一套基于OpenCL标准的基础api实现。我梳理了一下，需要重点实现的API以及对应功能如下：</p>
+<h1 id="基础API说明"><a href="#基础API说明" class="headerlink" title="基础API说明"></a>基础API说明</h1><p>对于我们实验室的硬件来说，期望实现的功能主要有：</p>
+<ol>
+<li>可以面向单platform、单context、多device的异构编程模型；</li>
+<li>支持单个device拥有多个DDR内存的场景；</li>
+<li>场景相对单一，因此api设计可以相对简单，不追求完备的OpenCL标准实现，但需要实现满足我们硬件需求的Interface。</li>
+</ol>
+<h2 id="API-List"><a href="#API-List" class="headerlink" title="API List"></a>API List</h2><p>为了应对上述场景，需要实现的基础API主要有以下几个：</p>
+<table>
+<thead>
+<tr>
+<th>API名称</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>clGetPlatformIDs</td>
+<td>获取平台ID</td>
+</tr>
+<tr>
+<td>clGetDeviceIDs</td>
+<td>获取设备ID</td>
+</tr>
+<tr>
+<td>clCreateContext</td>
+<td>创建上下文</td>
+</tr>
+<tr>
+<td>clCreateCommandQueue</td>
+<td>创建命令队列</td>
+</tr>
+<tr>
+<td>clCreateBuffer</td>
+<td>创建缓冲区</td>
+</tr>
+<tr>
+<td>clEnqueueWriteBuffer</td>
+<td>写入缓冲区</td>
+</tr>
+<tr>
+<td>clEnqueueReadBuffer</td>
+<td>读取缓冲区</td>
+</tr>
+<tr>
+<td>clEnqueueTask</td>
+<td>任务入队</td>
+</tr>
+<tr>
+<td>clSetKernelArg</td>
+<td>设置内核参数</td>
+</tr>
+<tr>
+<td>clCreateKernel</td>
+<td>创建内核</td>
+</tr>
+<tr>
+<td>clReleaseKernel</td>
+<td>释放内核</td>
+</tr>
+<tr>
+<td>clReleaseMemObject</td>
+<td>释放内存对象</td>
+</tr>
+<tr>
+<td>clReleaseCommandQueue</td>
+<td>释放命令队列</td>
+</tr>
+<tr>
+<td>clReleaseContext</td>
+<td>释放上下文</td>
+</tr>
+<tr>
+<td>clReleaseEvent</td>
+<td>释放事件</td>
+</tr>
+</tbody></table>
+<h2 id="Datastruct-List"><a href="#Datastruct-List" class="headerlink" title="Datastruct List"></a>Datastruct List</h2><p>原有OpenCL的数据结构很复杂，面对我们的应用场景，可以实现以下的数据结构：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs abnf">cl_context&#123;<br>    cl_device_id* devices<span class="hljs-comment">;</span><br>    unsigned int num_devices<span class="hljs-comment">;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs abnf">cl_device_id&#123;<br>    cl_device_type device_type<span class="hljs-comment">;</span><br>    cl_ulong global_mem_size<span class="hljs-comment">;</span><br>    void *data<span class="hljs-comment">;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs abnf">cl_command_queue&#123;<br>    cl_context context<span class="hljs-comment">;</span><br>    cl_device_id device<span class="hljs-comment">;</span><br>    cl_command_queue_properties properties<span class="hljs-comment">;</span><br>    cl_event event<span class="hljs-comment">;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs abnf">cl_mem&#123;<br>    cl_context context<span class="hljs-comment">;</span><br>    size_t size<span class="hljs-comment">;</span><br>    void* mem_ptr<span class="hljs-comment">;</span><br>    u64 mem_addr<span class="hljs-comment">;</span><br>    void *data<span class="hljs-comment">;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs fortran">cl_kernel&#123;<br>    cl_context context;<br>    cl_program <span class="hljs-function"><span class="hljs-keyword">program</span></span>;<br>    const <span class="hljs-built_in">char</span>* <span class="hljs-keyword">name</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>还有一些比较基础的cl数据结构，都是以快速实现功能为目的设计。如果是针对下面这种情况则是完全够用。</p>
+<p><img src="https://pic-aus-1252275196.cos.ap-nanjing.myqcloud.com/img/image-20250413204118276.png?imageMogr2/format/webp/interlace/0/strip%7Cwatermark/2/text/YXg6aHR0cDovL3d3dy5hb294aW4uY24v/font/c2ltZmFuZ-S7v-Wuiy50dGY/fontsize/18/fill/IzAwMDAwMA/dissolve/5/shadow/0/batch/1/degree/34" srcset="/img/loading.gif" alt="image-20250413204118276"></p>
+<h1 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h1><p>实验室具体代码暂时是闭源的，后续要是可以补充会放上。</p>
 
             </div>
             <hr>
@@ -284,15 +341,13 @@
                   <div class="post-meta mr-3">
                     <i class="iconfont icon-category"></i>
                     
-                      <a class="hover-with-bg" href="/categories/Intership/">Intership</a>
+                      <a class="hover-with-bg" href="/categories/AI/">AI</a>
                     
                   </div>
                 
                 
                   <div class="post-meta">
                     <i class="iconfont icon-tags"></i>
-                    
-                      <a class="hover-with-bg" href="/tags/C/">C++</a>
                     
                       <a class="hover-with-bg" href="/tags/Ai-infra/">Ai-infra</a>
                     
@@ -307,18 +362,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2025/04/13/opencl-base-api/">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">小芝士|简化OpenCL API梳理说明</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2024/04/08/cu2/">
-                        <span class="hidden-mobile">小技巧｜异构计算中C++ host 部分的性能测试（普通C++程序也适用）</span>
+                      <a href="/2024/10/28/amp-pass/">
+                        <span class="hidden-mobile">Intership｜Paddle的amp pass（混合精度 pass）新旧迭代中遇到的问题</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
